@@ -1,5 +1,7 @@
-name: Docker image
+name: Workspace image
 
+# Publishes ghcr.io/mateuszzx/fenicsx-workspace from this repository.
+# Project templates do not include this workflow.
 on:
   push:
     branches:
@@ -7,50 +9,22 @@ on:
       - master
     tags:
       - "v*.*.*"
-  pull_request:
+    paths:
+      - "image/**"
+      - ".github/workflows/workspace-image.yml"
   workflow_dispatch:
   schedule:
     # Rebuild weekly so :latest tracks dolfinx/dolfinx:nightly.
     - cron: "0 4 * * 1"
 
 concurrency:
-  group: docker-${{ github.workflow }}-${{ github.ref }}
+  group: workspace-image-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Build and test
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          load: true
-          provenance: false
-          tags: fenicsx-template:ci
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Lint
-        run: docker run --rm fenicsx-template:ci bash -lc "ruff check . && ruff format --check ."
-
-      - name: Test
-        run: docker run --rm fenicsx-template:ci python -m pytest
-
   publish:
-    name: Publish image
-    needs: test
-    if: github.event_name != 'pull_request'
+    name: Publish workspace image
+    if: github.repository == 'Mateuszzx/fenicsx-docker'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:
@@ -63,7 +37,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Image name
-        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/fenicsx-workspace" >> "$GITHUB_ENV"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -97,7 +71,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: image
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

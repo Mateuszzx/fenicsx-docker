@@ -1,4 +1,4 @@
-# fenicsx-template zsh — same interactive setup as the embedded-templates images.
+# FEniCSx workspace zsh — same interactive setup as the embedded-templates images.
 
 autoload -Uz colors && colors
 setopt PROMPT_SUBST INTERACTIVE_COMMENTS AUTO_CD
@@ -13,7 +13,7 @@ alias ls='ls --color=auto'
 alias ll='ls -lah --color=auto'
 alias grep='grep --color=auto'
 
-PROJECT_NAME="${HOST:-${HOSTNAME:-fenicsx-template}}"
+PROJECT_NAME="${HOST:-${HOSTNAME:-fenicsx}}"
 PROMPT='%F{cyan}%n%f@%F{magenta}${PROJECT_NAME}%f %F{yellow}%1~%f %# '
 RPROMPT='%F{green}%*%f'
 
