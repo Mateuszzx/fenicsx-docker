@@ -1,0 +1,68 @@
+# fenicsx-template zsh — same interactive setup as the embedded-templates images.
+
+autoload -Uz colors && colors
+setopt PROMPT_SUBST INTERACTIVE_COMMENTS AUTO_CD
+setopt SHARE_HISTORY EXTENDED_HISTORY HIST_IGNORE_DUPS HIST_IGNORE_SPACE
+HISTFILE=~/.zsh_history
+HISTSIZE=20000
+SAVEHIST=20000
+
+export CLICOLOR=1
+export LS_COLORS="di=1;34:ln=1;36:ex=1;32:*.elf=1;33:*.bin=1;33"
+alias ls='ls --color=auto'
+alias ll='ls -lah --color=auto'
+alias grep='grep --color=auto'
+
+PROJECT_NAME="${HOST:-${HOSTNAME:-fenicsx-template}}"
+PROMPT='%F{cyan}%n%f@%F{magenta}${PROJECT_NAME}%f %F{yellow}%1~%f %# '
+RPROMPT='%F{green}%*%f'
+
+# fzf completion only (Ctrl-T / Alt-C from key-bindings; Ctrl-R owned by plugin below)
+if [ -f /usr/share/doc/fzf/examples/completion.zsh ]; then
+    source /usr/share/doc/fzf/examples/completion.zsh
+fi
+if [ -f /usr/share/fzf/shell/completion.zsh ]; then
+    source /usr/share/fzf/shell/completion.zsh
+fi
+if [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
+    source /usr/share/doc/fzf/examples/key-bindings.zsh
+elif [ -f /usr/share/fzf/shell/key-bindings.zsh ]; then
+    source /usr/share/fzf/shell/key-bindings.zsh
+fi
+
+# Ctrl-R → zsh-fzf-history-search (timestamps + fuzzy list)
+# https://github.com/joshskidmore/zsh-fzf-history-search
+typeset -g ZSH_FZF_HISTORY_SEARCH_BIND='^r'
+typeset -g ZSH_FZF_HISTORY_SEARCH_DATES_IN_SEARCH=1
+typeset -g ZSH_FZF_HISTORY_SEARCH_EVENT_NUMBERS=1
+typeset -g ZSH_FZF_HISTORY_SEARCH_END_OF_LINE=1
+typeset -g ZSH_FZF_HISTORY_SEARCH_REMOVE_DUPLICATES=1
+# Drop plugin default -e (exact-only); keep fuzzy match + compact UI
+typeset -g ZSH_FZF_HISTORY_SEARCH_FZF_ARGS='+s +m -x --preview-window=hidden'
+typeset -g ZSH_FZF_HISTORY_SEARCH_FZF_EXTRA_ARGS='--height=40% --layout=reverse --border --info=inline'
+
+if [ -f /usr/local/share/zsh-plugins/zsh-fzf-history-search/zsh-fzf-history-search.zsh ]; then
+    source /usr/local/share/zsh-plugins/zsh-fzf-history-search/zsh-fzf-history-search.zsh
+elif [ -f /usr/local/share/zsh-plugins/zsh-fzf-history-search/zsh-fzf-history-search.plugin.zsh ]; then
+    source /usr/local/share/zsh-plugins/zsh-fzf-history-search/zsh-fzf-history-search.plugin.zsh
+fi
+
+if [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+if [ -f /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+alias r='ranger'
+alias top='btop'
+alias bashtop='btop'
+alias serial='tio'
+
+if [ -f "$HOME/.local/bin/env" ]; then
+    . "$HOME/.local/bin/env"
+fi
+
+if [ -n "${PROJECT_ROOT:-}" ] && [ -d "${PROJECT_ROOT}" ]; then
+    cd "${PROJECT_ROOT}"
+fi
